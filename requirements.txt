@@ -1,0 +1,21 @@
+# 核心
+pyautogui==0.9.54
+pywin32==306
+psutil>=5.9.0
+
+# 音频
+pyaudio==0.2.11
+numpy>=1.24.0
+sounddevice==0.4.6
+pydub==0.25.1
+librosa>=0.10.0
+scipy>=1.10.0
+soundfile>=0.12.0
+
+# 配置与日志
+pyyaml>=6.0
+colorlog==6.7.0
+
+# 图像 / 问答 OCR（可选，未安装时跳过问答识别）
+Pillow>=10.0.0
+pytesseract>=0.3.10

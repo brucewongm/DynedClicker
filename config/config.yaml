@@ -1,0 +1,64 @@
+audio:
+  channels: 1
+  chunk_size: 1024
+  debounce_frames: 10
+  max_record_seconds: 120
+  pitch_shift_semitones: 4
+  processing_timeout: 0.8
+  sample_rate: 44100
+  silence_duration: 1.0
+  silence_threshold: 0.01
+c_mode:
+  click:
+    x: 922
+    y: 840
+  click_cooldown: 2.0
+  silence_duration: 1.0
+focus:
+  check_interval: 0.5
+  pause_on_focus_loss: true
+  stop_on_focus_loss: true
+gui:
+  app_profile: c
+  last_mode: master
+  start_minimized: false
+logging:
+  backup_count: 5
+  file: logs/automation.log
+  level: INFO
+  max_bytes: 10485760
+mouse_regions:
+  continue:
+    x: 993
+    y: 957
+  play:
+    x: 690
+    y: 955
+  record:
+    x: 603
+    y: 959
+  repeat:
+    x: 917
+    y: 961
+network:
+  ack_timeout: 1.0
+  bind_ip: 0.0.0.0
+  connect_timeout: 5
+  heartbeat_interval: 3
+  master_ip: 192.168.1.9
+  message_timeout: 120.0
+  port: 8888
+  reconnect_interval: 2.0
+quiz:
+  default_choice: first
+  enabled: true
+  keywords:
+  - 'yes'
+  - 'no'
+  - 'true'
+  - 'false'
+  scan_interval: 0.8
+target_window:
+  auto_find: true
+  window_class: TkTopLevel
+  window_title: Dy 音频自动化 · C 模式

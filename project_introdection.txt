@@ -1,0 +1,23 @@
+一、项目介绍
+1.这是一个音视频软件Dy的音频监测和交互工具audioauto。
+2.这个工具运行模式支持两个模式，A模式，和B模式。
+3.工具支持运行在windows电脑上，可选择A模式，也可选择B模式。
+4.工具具有图形化选择和设置界面，运行时在后台运行。
+5.被监测的音视频软件有焦点监测功能，当软件失焦时将停止运行。
+
+二、功能介绍
+1.运行audioauto A模式的电脑称为master，运行audioauto B模式的电脑称为slave。
+2.master和slave两台电脑在同一局域网，能基于IP相互通信。
+3.master 的audioauto通过交互控制slave上的audioauto。
+4.master上的audioauto监测音视频软件Dy的音频输出、后台控制和点击鼠标。
+5.master上的audioauto能截图并识别Dy弹出的互动提问的可选择区域，并操作执行点击操作。
+6.Dy的主要功能是需要通过点击以下几个按钮实现：继续按钮continue，重复按钮repeat，录音record，播放录音play。
+7.master有的主要功能顺序：
+	1）master向slave发出开始命令，slave开始监听并发送acknowledgement信号。如果master超时1秒没收到acknowledgement信号，报错终止执行，检查网络、master和slave的交互功能。 
+	2）若正常运行，slave开始录音，在监听到音频播放出现1秒以上停顿时，停止录音。master和slave同步操作节点。
+	3）master点击record，slave处理音频音色音调后播放录音。
+	4）master点击play，完成后点击continue。
+	5）若Dy界面出现提问，master截图分析可点击的多选框、[yes,no] 、[true,false]等可能出现的界面中的可点击区域，并执行鼠标点击操作。等界面切换后，master和slave同步状态信息，进行下一轮录音监测和播放。
+	6）master和slave一直执行到Dy的一次人机交互播放完毕。
+8.有log记录功能，master和slave都会在自己本地记录log。
+9.slave永远由master来控制。

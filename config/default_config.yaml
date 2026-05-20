@@ -1,0 +1,65 @@
+# Dy 音频自动化 - 默认配置
+
+mouse_regions:
+  continue: {x: 0, y: 0}
+  repeat: {x: 0, y: 0}
+  record: {x: 0, y: 0}
+  play: {x: 0, y: 0}
+
+target_window:
+  window_title: ""
+  window_class: ""
+  auto_find: true
+
+audio:
+  silence_threshold: 0.01
+  silence_duration: 1.0
+  debounce_frames: 10
+  sample_rate: 44100
+  chunk_size: 1024
+  channels: 1
+  pitch_shift_semitones: 4
+  processing_timeout: 0.8
+  max_record_seconds: 120
+
+network:
+  master_ip: "3.1.0.119"
+  bind_ip: "0.0.0.0"
+  port: 8888
+  heartbeat_interval: 3
+  connect_timeout: 5
+  reconnect_interval: 2.0
+  ack_timeout: 1.0
+  message_timeout: 120.0
+
+logging:
+  level: INFO
+  file: logs/automation.log
+  max_bytes: 10485760
+  backup_count: 5
+
+focus:
+  check_interval: 0.5
+  stop_on_focus_loss: true
+  pause_on_focus_loss: true
+  resume_delay: 0.4
+
+quiz:
+  enabled: true
+  scan_interval: 0.8
+  keywords:
+    - "yes"
+    - "no"
+    - "true"
+    - "false"
+  default_choice: "first"
+
+c_mode:
+  click: {x: 0, y: 0}
+  silence_duration: 1.0
+  click_cooldown: 2.0
+
+gui:
+  start_minimized: false
+  app_profile: ab
+  last_mode: master
