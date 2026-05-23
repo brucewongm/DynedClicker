@@ -1,64 +1,105 @@
 audio:
-  channels: 1
   chunk_size: 1024
-  debounce_frames: 10
-  max_record_seconds: 120
-  pitch_shift_semitones: 4
-  processing_timeout: 0.8
+  chunk_stall_seconds: 5.0
+  dynamic_threshold_factor: 0.35
+  peak_hold_ratio: 0.15
+  read_timeout: 3.0
   sample_rate: 44100
-  silence_duration: 1.0
   silence_threshold: 0.01
-c_mode:
-  click:
-    x: 922
-    y: 840
+auto_exit:
+  at: '2026-05-24 16:47:41'
+  enabled: true
+coords:
+  use_reference_defaults: false
+dyclicker:
   click_cooldown: 2.0
-  silence_duration: 1.0
+  coord_sample_hotkey: Ctrl+F8
+  hide_gui_while_running: true
+  page_ocr_hotkey: Ctrl+F2
+  playback_ratio: 2.5
+  relative_detection: true
+  silence_duration: 5.0
+  silence_ratio: 1.4
+  start_hotkey: F9
+  step_click_delay: 2.0
+  stop_hotkey: F10
+  video_review_cycles: 1
+  wf_switch_delay: 2.0
 focus:
   check_interval: 0.5
-  pause_on_focus_loss: true
+  pause_on_focus_loss: false
   stop_on_focus_loss: true
-gui:
-  app_profile: c
-  last_mode: master
-  start_minimized: false
+global_buttons:
+  back:
+    x: 355
+    y: 766
+  forward:
+    x: 798
+    y: 767
+  listen:
+    x: 561
+    y: 766
+  record:
+    x: 478
+    y: 771
+  replay:
+    x: 733
+    y: 764
 logging:
   backup_count: 5
-  file: logs/automation.log
+  file: logs/dyclicker.log
+  gui_max_lines: 2000
   level: INFO
   max_bytes: 10485760
-mouse_regions:
-  continue:
-    x: 993
-    y: 957
-  play:
-    x: 690
-    y: 955
-  record:
-    x: 603
-    y: 959
-  repeat:
-    x: 917
-    y: 961
-network:
-  ack_timeout: 1.0
-  bind_ip: 0.0.0.0
-  connect_timeout: 5
-  heartbeat_interval: 3
-  master_ip: 192.168.1.9
-  message_timeout: 120.0
-  port: 8888
-  reconnect_interval: 2.0
-quiz:
-  default_choice: first
-  enabled: true
-  keywords:
-  - 'yes'
-  - 'no'
-  - 'true'
-  - 'false'
-  scan_interval: 0.8
+ocr:
+  lang: eng
+  step1_keywords:
+  - Company
+  - Description
+  tessdata_dir: ''
+  tesseract_cmd: ''
 target_window:
-  auto_find: true
-  window_class: TkTopLevel
-  window_title: Dy 音频自动化 · C 模式
+  focus_delay_seconds: 3
+  focus_hold_seconds: 3
+  window_class: dynedEngineWindowClass
+  window_title: Dynamic Business English v5-0
+workflows:
+  step1_slots:
+  - x: 428
+    y: 334
+  - x: 765
+    y: 332
+  - x: 449
+    y: 434
+  - x: 764
+    y: 434
+  - x: 428
+    y: 522
+  - x: 766
+    y: 519
+  step2_shared:
+  - x: 456
+    y: 282
+  - x: 456
+    y: 356
+  - x: 471
+    y: 442
+  - x: 474
+    y: 510
+  - x: 464
+    y: 596
+  - x: 456
+    y: 670
+  step3_shared:
+  - x: 777
+    y: 283
+  - x: 766
+    y: 359
+  - x: 771
+    y: 430
+  - x: 769
+    y: 507
+  - x: 767
+    y: 592
+  - x: 790
+    y: 671

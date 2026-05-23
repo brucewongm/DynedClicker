@@ -1,0 +1,152 @@
+---
+description: dyclicker 项目功能说明与实现约定，源自 rehearsal.txt
+globs: "**/*"
+alwaysApply: false
+---
+
+# dyclicker 项目约定
+
+## 项目定位
+
+- **工具名称**：dyclicker
+- **核心能力**：音频监测、文字识别（OCR）、鼠标自动化
+- **GUI**：**tkinter + ttk**（见 `.cursor/rules/gui-ttk.mdc`）
+- **日志**：文件轮转 + GUI 日志区双通道（见 `.cursor/rules/logging.mdc`，`alwaysApply: true`）
+- **典型场景**：Dy 多级页面 workflow 批量自动化；video review 循环播放
+- **焦点监测**：目标音视频软件失焦时 **立即停止**（见 `.cursor/rules/focus-monitor.mdc`，`alwaysApply: true`）
+
+## 工作流结构
+
+1. 共 **6 个工作流**：workflow1–workflow6（简称 wf1–wf6）。
+2. 每个工作流分 **3 个 step**：step1、step2、step3。
+3. 每个 step 页面有 **6 个 slot**（slot1–slot6），坐标见 `.cursor/rules/global-mouse-coords.mdc`。
+
+## 单条 workflow 执行顺序（强制）
+
+对 workflow **N**（N=1…6），**必须**按下列顺序执行：
+
+```
+step1：点击 slotN（wf1→slot1，wf2→slot2，…，wf6→slot6）
+  → 停顿 2 秒
+step2：点击 slot6
+  → 停顿 2 秒
+step3：点击 slot6，进入 video review 播放阶段
+  → 音频监测（停顿超过 5 秒时再次点击 step3 的 slot6）
+  → 达到播放次数后结束本 workflow
+```
+
+| Workflow | step1 槽位 | step2 槽位 | step3 槽位 |
+|----------|------------|------------|------------|
+| wf1 | slot1 | slot6 | slot6 |
+| wf2 | slot2 | slot6 | slot6 |
+| wf3 | slot3 | slot6 | slot6 |
+| wf4 | slot4 | slot6 | slot6 |
+| wf5 | slot5 | slot6 | slot6 |
+| wf6 | slot6 | slot6 | slot6 |
+
+## 主循环
+
+1. 主循环依次遍历 **wf1 → wf2 → wf3 → wf4 → wf5 → wf6**。
+2. 每个 workflow 的每个 step 点击后 **停顿 2 秒**。
+3. step3 点击后进入 **video review** 播放阶段；播放次数可配置，**0 表示无限循环**。
+
+## step3 音频监测
+
+1. step3 点击 slot6 后开始音频监测。
+2. 当音频 **停顿超过 5 秒** 时，点击 step3 的 slot6，进入下一次播放。
+3. 重复直至达到设定的 **video review 播放次数**（0 = 无限循环）。
+4. 播放阶段 **严禁点击回退坐标**；仅在当前 workflow 全部播放完毕后再执行回退（若流程需要）。
+
+## 文字识别（OCR）
+
+1. 通过 OCR 识别当前页面文字。
+2. **同时命中 `Company` 和 `Description`** 时，判定为 **step1 页面**。
+3. 快捷键 **Ctrl+F2** 触发页面文字识别（测试/辅助）。
+
+## 回退按钮安全
+
+- 每次点击 **back** 按钮前，**必须** OCR 确认当前页面为 **非 step1 页面**。
+- 防止程序因错误点击而退出应用。
+
+## 全局功能按钮
+
+| 按钮 | 坐标 (x, y) | 说明 |
+|------|-------------|------|
+| back（回退） | (442, 955) | 回退前须确认非 step1 |
+| record（录音） | (670, 955) | |
+| listen（收听） | (700, 955) | |
+| replay（重播） | (910, 955) | |
+| forward（前进） | (1000, 955) | |
+
+坐标默认值见 `.cursor/rules/global-mouse-coords.mdc`（`alwaysApply: true`）。
+
+## 快捷键
+
+| 热键 | 动作 |
+|------|------|
+| **F9** | 开始 |
+| **F10** | 停止 |
+| **Ctrl+F2** | 页面文字识别 |
+
+**勿随意改动 F9/F10 默认值**，除非用户明确要求或解决系统级冲突。
+
+## 目标窗口焦点监测
+
+- 监测 **被监测音视频软件**（目标窗口）是否为系统前台窗口。
+- **失去焦点时立即停止** 全部自动化（workflow、音频监测、待执行点击）；不暂停等待、不自动续跑。
+- 用户再次 F9 方可重新启动。
+- 详情与配置见 `.cursor/rules/focus-monitor.mdc`。
+
+## 定时退出
+
+- 可设置：到达 **特定日期的特定时间** 后，dyclicker **自动退出**。
+- **默认值**：当前时间 + 24 小时。
+
+## 配置项（建议结构）
+
+```yaml
+dyclicker:
+  start_hotkey: F9
+  stop_hotkey: F10
+  page_ocr_hotkey: Ctrl+F2
+  step_click_delay: 2.0          # 每 step 点击后停顿秒数
+  silence_duration: 5.0          # 音频停顿触发阈值（秒）
+  video_review_cycles: 0         # 0 = 无限循环
+  auto_exit_at: null             # ISO 日期时间；null 时用 now+24h
+  ocr:
+    step1_keywords: [Company, Description]
+
+focus:
+  stop_on_focus_loss: true
+  pause_on_focus_loss: false     # dyclicker 固定：失焦即停，不等待恢复
+  check_interval: 0.5
+
+target_window:
+  title: ""
+  class_name: ""
+  hwnd: 0
+
+logging:
+  level: INFO
+  file: logs/dyclicker.log
+  max_bytes: 10485760
+  backup_count: 5
+  gui_max_lines: 2000
+```
+
+## GUI 与日志（摘要）
+
+- 界面控件一律 **`ttk.*`**；详情见 `gui-ttk.mdc`。
+- 主窗口含 **底部日志区**；`setup_logging()` 同时写文件与 GUI。
+- 后台线程不得直接改 Tk 控件；UI 更新走 `root.after` 或 `LogPanelController`。
+- 运行中启动 **焦点监测**；失焦停止后 GUI 显示「已停止（失焦）」。
+
+## 修改约定
+
+- 坐标相关变更须同步更新 `global-mouse-coords.mdc`、代码内 `REFERENCE_*` 常量及默认配置。
+- OCR 逻辑变更时须保持「Company + Description → step1」判定不变，除非用户明确要求。
+- back 点击前 **必须**保留非 step1 校验，不可省略。
+- 音频监测阈值默认 **5 秒**；与 sibling 项目 DynedClicker（3 秒）不同，勿混用。
+- **焦点监测**默认开启；失焦必须 stop，不可改为仅警告或暂停等待。
+- GUI 新增面板/控件须用 ttk；core 模块不依赖 tkinter。
+- 新增功能须写日志（关键路径 INFO+）、写入默认配置并补测试。

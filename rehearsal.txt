@@ -1,0 +1,52 @@
+一、项目介绍
+这是一个音频监测，文字识别与鼠标控制工具，由GUI界面，工具名称为dyclicker
+
+二、项目基础参数
+1.有六个工作流workflow1至workflow6，简称为wf1，wf2，wf3，wf4，wf5，wf6。
+2.每个工作流有3个step，分别为step1，step2，step3
+4.每个工作流step1页面有6个slot，6个slot坐标分别为
+slot1:(525, 420) 
+slot2: (955, 415) 
+slot3: (525, 530) 
+slot4: (955, 530) 
+slot5: (525, 655) 
+slot6:(955, 650)
+5.每个工作流step2页面有6个slot，6个slot坐标分别为
+slot1:(570, 343) 
+slot2:(570, 450) 
+slot3:(570, 547) 
+slot4: (570, 636) 
+slot5:(570, 745) 
+slot6: (570, 837) 
+6.每个工作流step3页面有6个slot，6个slot坐标分别为
+slot1:(980, 343)
+slot2: (980, 450) 
+slot3:(980, 547) 
+slot4:(980, 636) 
+slot5: (980, 745) 
+slot6:(980, 837) 
+7.全局按钮
+全局回退按钮back： (442, 955) 
+全局录音按钮record：(670, 955)
+全局收听按钮listen： (700, 955)
+全局重播按钮replay： (910, 955)
+全局前进按钮forward： (1000, 955)
+
+
+三、项目功能
+1.支持文字识别功能。通过文字识别，同时命中Company和Description时则为step1页面。
+2.每次点击back钮时，都需要识别当前页面为‘非step1页面‘，防止程序因错误点击而退出。
+3.wf1的step1点击坐标为slot1，step2点击坐标为slot6，step3点击坐标为slot6 。
+4.wf2的step1点击坐标为slot2，step2点击坐标为slot6，step3点击坐标为slot6 。
+5.wf3的step1点击坐标为slot3，step2点击坐标为slot6，step3点击坐标为slot6 。
+6.wf4的step1点击坐标为slot4，step2点击坐标为slot6，step3点击坐标为slot6 。
+7.wf5的step1点击坐标为slot5，step2点击坐标为slot6，step3点击坐标为slot6 。
+8.wf6的step1点击坐标为slot6，step2点击坐标为slot6，step3点击坐标为slot6 。
+9.定时功能，可设置，在到达特定日期的特定时间后，dyclicker自动退出。默认值为当前时间加24小时。
+10.支持音频监测功能，能监测到音频的播放和停顿，以及能监测音频的停顿时长。
+11.快捷键功能。开始：F9. 停止：F10. 页面文字识别：ctrl+F2
+12.video review播放次数设置功能。每个workflow的step3的slot6点击后，进入了video review播放阶段，这个阶段播放次数可设置，若为0则无限循环。
+四、执行流程
+1.主循环：遍历wf1，wf2，wf3，wf4，wf5，wf6.
+2.每个workflow，每个step点击时，停顿2秒。
+3.每个workflow的step3点击后，开始进入音频监测，当音频停顿超过5秒时，点击step3的slot6，继续进入下一次播放直到达到播放次数。

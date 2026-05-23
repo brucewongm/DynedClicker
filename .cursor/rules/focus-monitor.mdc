@@ -1,0 +1,84 @@
+---
+description: 【强制】监测目标音视频软件窗口焦点；失焦时立即停止 dyclicker 运行
+globs: core/focus/**,core/mouse/**,core/workflow/**,gui/**,main.py
+alwaysApply: true
+---
+
+# 目标窗口焦点监测（强制）
+
+## 行为约定
+
+dyclicker 监测的是 **被监测的音视频软件**（下称「目标窗口」，通常为 Dy）的前台焦点状态。
+
+| 事件 | 行为 |
+|------|------|
+| 目标窗口 **有焦点** | 正常运行 workflow / 音频监测 / OCR |
+| 目标窗口 **失去焦点** | **立即停止** 当前运行（等同 F10 停止） |
+| 焦点 **恢复** | **不自动续跑**；用户须再次 F9 或点「开始」 |
+
+**禁止**失焦后「暂停等待恢复」再继续（DynedClicker Master 的 `pause_on_focus_loss` 模式不适用于 dyclicker）。
+
+## 实现要点
+
+### 模块
+
+- `core/focus_monitor.py` → `FocusMonitor`（可参考 sibling `DynedClicker/core/focus_monitor.py`）
+- 依赖 `core/mouse/window_tools.py` → `WindowManager` 维护 `target_hwnd`
+- 检测方式：`win32gui.GetForegroundWindow() == target_hwnd`
+
+### 生命周期
+
+1. **F9 启动**后、`workflow` 线程开始前：创建并 `FocusMonitor.start()`。
+2. 失焦回调 `on_focus_lost`：**必须** `stop_event.set()`，并 `root.after(0, …)` 更新 GUI 状态为「已停止（失焦）」。
+3. **F10 停止**或任务自然结束：`FocusMonitor.stop()`。
+4. 主循环、`time.sleep`、音频等待等 **须周期性检查** `stop_event.is_set()`，失焦后尽快退出。
+
+### dyclicker 专用参数
+
+```yaml
+focus:
+  stop_on_focus_loss: true       # 默认 true，不可默认 false
+  pause_on_focus_loss: false     # dyclicker 固定 false
+  check_interval: 0.5            # 秒
+
+target_window:
+  title: ""                      # 窗口标题片段，校准后写入
+  class_name: ""
+  hwnd: 0
+```
+
+`FocusMonitor` 初始化时 **`pause_on_focus_loss=False`**（或通过配置强制为 false）。
+
+### 启动前
+
+- 须已校准/定位目标窗口（`WindowManager.ensure_target_window`）。
+- 建议启动时 **隐藏或最小化 dyclicker 自身窗口**，把焦点留给目标软件（见 `gui-ttk.mdc`）。
+- 未找到目标窗口时：**拒绝启动** 并 `logger.error`。
+
+## 日志（强制）
+
+| 事件 | 级别 | 示例 |
+|------|------|------|
+| 监测启动 | INFO | `焦点监测已启动 (失焦停止)` |
+| 失焦停止 | ERROR | `目标窗口已失焦，停止运行` |
+| 目标窗口不可用 | WARNING | `目标窗口不可用` |
+
+失焦停止须同时写入 **文件日志** 与 **GUI 日志区**。
+
+## 与 workflow / 音频的协作
+
+- `FocusMonitor` 与 workflow 线程 **并行**；失焦通过共享 `stop_event` 通知 runner。
+- 音频监测循环、step 间 `sleep(2)` 须可中断（检查 `stop_event` 或拆分 sleep）。
+- 失焦停止时 **不得** 再执行鼠标点击（含 slot6 续播、back）。
+
+## 禁止事项
+
+- 禁止失焦后仅打日志而不停止
+- 禁止失焦后自动抢焦点回目标窗口并继续跑（除非用户明确要求）
+- 禁止将 dyclicker 自身窗口当作焦点监测对象（监测对象始终是 **目标音视频软件**）
+
+## 测试建议
+
+- mock `GetForegroundWindow`：失焦时 `stop_event` 被 set、runner 退出
+- 失焦后无额外鼠标点击
+- GUI 状态经 `root.after` 更新为已停止

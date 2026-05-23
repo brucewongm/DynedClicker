@@ -1,65 +1,75 @@
-# Dy 音频自动化 - 默认配置
-
-mouse_regions:
-  continue: {x: 0, y: 0}
-  repeat: {x: 0, y: 0}
-  record: {x: 0, y: 0}
-  play: {x: 0, y: 0}
-
+audio:
+  chunk_size: 1024
+  chunk_stall_seconds: 5.0
+  dynamic_threshold_factor: 0.35
+  peak_hold_ratio: 0.15
+  read_timeout: 3.0
+  sample_rate: 44100
+  silence_threshold: 0.01
+auto_exit:
+  at: null
+  enabled: true
+coords:
+  use_reference_defaults: false
+dyclicker:
+  click_cooldown: 2.0
+  coord_sample_hotkey: Ctrl+F8
+  hide_gui_while_running: true
+  page_ocr_hotkey: Ctrl+F2
+  playback_ratio: 2.5
+  relative_detection: true
+  silence_duration: 5.0
+  silence_ratio: 1.4
+  start_hotkey: F9
+  step_click_delay: 2.0
+  stop_hotkey: F10
+  video_review_cycles: 0
+  wf_switch_delay: 2.0
+focus:
+  check_interval: 0.5
+  pause_on_focus_loss: false
+  stop_on_focus_loss: true
+global_buttons:
+  back: {x: 352, y: 764}
+  record: {x: 478, y: 771}
+  listen: {x: 561, y: 766}
+  replay: {x: 733, y: 764}
+  forward: {x: 798, y: 767}
+logging:
+  level: INFO
+  file: logs/dyclicker.log
+  max_bytes: 10485760
+  backup_count: 5
+  gui_max_lines: 2000
+ocr:
+  tesseract_cmd: ""
+  lang: eng
+  tessdata_dir: ""
+  step1_keywords: [Company, Description]
 target_window:
   window_title: ""
   window_class: ""
-  auto_find: true
-
-audio:
-  silence_threshold: 0.01
-  silence_duration: 1.0
-  debounce_frames: 10
-  sample_rate: 44100
-  chunk_size: 1024
-  channels: 1
-  pitch_shift_semitones: 4
-  processing_timeout: 0.8
-  max_record_seconds: 120
-
-network:
-  master_ip: "3.1.0.119"
-  bind_ip: "0.0.0.0"
-  port: 8888
-  heartbeat_interval: 3
-  connect_timeout: 5
-  reconnect_interval: 2.0
-  ack_timeout: 1.0
-  message_timeout: 120.0
-
-logging:
-  level: INFO
-  file: logs/automation.log
-  max_bytes: 10485760
-  backup_count: 5
-
-focus:
-  check_interval: 0.5
-  stop_on_focus_loss: true
-  pause_on_focus_loss: true
-  resume_delay: 0.4
-
-quiz:
-  enabled: true
-  scan_interval: 0.8
-  keywords:
-    - "yes"
-    - "no"
-    - "true"
-    - "false"
-  default_choice: "first"
-
-c_mode:
-  click: {x: 0, y: 0}
-  silence_duration: 1.0
-  click_cooldown: 2.0
-
-gui:
-  start_minimized: false
-  app_profile: ab
-  last_mode: master
+  focus_delay_seconds: 3
+  focus_hold_seconds: 3
+workflows:
+  step1_slots:
+    - {x: 418, y: 330}
+    - {x: 765, y: 333}
+    - {x: 449, y: 434}
+    - {x: 764, y: 434}
+    - {x: 428, y: 522}
+    - {x: 767, y: 521}
+  step2_shared:
+    - {x: 456, y: 282}
+    - {x: 456, y: 356}
+    - {x: 471, y: 442}
+    - {x: 474, y: 510}
+    - {x: 464, y: 596}
+    - {x: 454, y: 664}
+  step3_shared:
+    - {x: 777, y: 283}
+    - {x: 766, y: 359}
+    - {x: 771, y: 430}
+    - {x: 769, y: 507}
+    - {x: 767, y: 592}
+    - {x: 758, y: 672}

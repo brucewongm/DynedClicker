@@ -1,0 +1,86 @@
+---
+description: 【强制】dyclicker 日志记录：RotatingFileHandler 落盘 + GUI 日志区双通道
+globs: "**/*"
+alwaysApply: true
+---
+
+# 日志记录约定（强制）
+
+## 双通道输出
+
+dyclicker **必须**同时具备：
+
+1. **文件日志**：`RotatingFileHandler` 写入 `logs/` 目录，UTF-8，按大小轮转。
+2. **GUI 日志区**：主窗口底部 `ScrolledText`，经 `GuiLogHandler` 实时显示。
+
+无 GUI 启动（如 CLI 测试）时，可回退 **colorlog 控制台**；有 GUI 时优先 GUI 通道。
+
+## 初始化
+
+- 统一入口：`core/logging_setup.py` → `setup_logging(config, role="dyclicker")`。
+- logger 名：`dyclicker.{role}`；默认 role 为 `dyclicker`。
+- 日志文件：配置项 `logging.file`，默认 `logs/dyclicker.log`；带 role 时为 `logs/dyclicker_{role}.log`。
+- **禁止**在业务模块散落 `basicConfig` 或重复添加 FileHandler。
+
+```python
+from core.logging_setup import setup_logging
+
+logger = setup_logging(config, role="dyclicker")
+logger.info("workflow wf%d step1 点击 slot%d", wf, slot)
+```
+
+## 默认配置
+
+```yaml
+logging:
+  level: INFO
+  file: logs/dyclicker.log
+  max_bytes: 10485760    # 10 MB
+  backup_count: 5
+  gui_max_lines: 2000    # GUI 日志区最大行数
+```
+
+## GUI 日志模块（`gui/log_view.py`）
+
+| 类 | 职责 |
+|----|------|
+| `GuiLogBus` | 线程安全总线；`set_active(True, callback)` 在 GUI 启动后启用 |
+| `GuiLogHandler` | `logging.Handler` → 转发到 `GuiLogBus` |
+| `LogPanelController` | 队列 + `root.after` 追加到 `ScrolledText`；按级别着色；超限删旧行 |
+| `StdoutToGui` | 可选：重定向 `print` 到日志区 |
+
+`setup_logging` 在 `GuiLogBus.is_active()` 为真时自动挂载 `GuiLogHandler`，否则使用控制台。
+
+## 必记日志场景
+
+| 场景 | 级别 | 示例 |
+|------|------|------|
+| 启动 / 停止 | INFO | `dyclicker 已启动 (F9)` |
+| workflow 进度 | INFO | `wf3 step2 点击 slot6 (570,837)` |
+| step 间等待 | DEBUG | `step 点击后等待 2.0s` |
+| 音频停顿触发 | INFO | `静音 5.2s，点击 step3 slot6 续播 (3/5)` |
+| OCR 判定 | INFO | `OCR: step1 页面 (Company+Description)` |
+| back 拦截 | WARNING | `step1 页面，跳过 back 点击` |
+| 定时退出 | INFO | `到达 auto_exit_at，程序退出` |
+| 热键 | INFO | `热键 F10：停止` |
+| 失焦停止 | ERROR | `目标窗口已失焦，停止运行` |
+| 异常 | ERROR | `音频设备不可用: …` |
+
+## 级别约定
+
+- **DEBUG**：chunk 音量、内部状态、等待计时。
+- **INFO**：用户可见的关键流程节点。
+- **WARNING**：可恢复异常、安全拦截（如 back 跳过）。
+- **ERROR / CRITICAL**：失败、需用户介入。
+
+## core 模块规范
+
+- 各模块使用 `logging.getLogger(__name__)` 或传入的 `logger` 参数；**禁止** `print` 输出业务状态（测试脚本除外）。
+- `workflow` runner 在每次点击、静音触发、workflow 切换处写 INFO。
+- OCR、音频、热键模块在判定结果与异常处写日志。
+
+## 修改约定
+
+- 新增功能须补充关键路径日志，便于用户对照 GUI 与 `logs/dyclicker.log` 排查。
+- 改 `logging_setup` 时须保持文件 + GUI 双通道逻辑。
+- GUI 日志区行数上限读 `logging.gui_max_lines`，默认 2000。

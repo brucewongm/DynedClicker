@@ -1,0 +1,63 @@
+---
+description: dyclicker GUI 须基于 tkinter.ttk 构建；布局、线程与日志区约定
+globs: gui/**,main.py,**/app.py
+alwaysApply: false
+---
+
+# GUI 约定（tkinter + ttk）
+
+## 技术栈（强制）
+
+- **GUI 框架**：标准库 `tkinter` + **`tkinter.ttk`**（Themed Tk）。
+- **禁止**使用 PyQt、wxPython、CustomTkinter 等第三方 GUI 框架，除非用户明确要求替换。
+- **禁止**在业务面板中直接使用 `tk.Button`、`tk.Label`、`tk.Entry` 等经典控件；统一改用 `ttk.*` 等价组件。
+- **允许**的 classic tk 控件：`tk.Tk` / `tk.Toplevel` 根窗口、`tk.StringVar` / `tk.IntVar` / `tk.BooleanVar`、`scrolledtext.ScrolledText`（日志区）、`messagebox` / `filedialog`。
+
+## 常用 ttk 组件
+
+| 用途 | 组件 |
+|------|------|
+| 容器 | `ttk.Frame`、`ttk.LabelFrame`、`ttk.Notebook` |
+| 文本 | `ttk.Label` |
+| 输入 | `ttk.Entry`、`ttk.Spinbox`、`ttk.Combobox` |
+| 操作 | `ttk.Button`、`ttk.Checkbutton`、`ttk.Radiobutton` |
+| 布局 | `pack` / `grid`；表单优先 `grid`，工具栏优先 `pack` |
+
+## 建议目录
+
+```
+gui/
+├── app.py              # 主窗口、Notebook、日志区、启停入口
+├── main_panel.py       # 运行参数：播放次数、定时退出、启停按钮
+├── coords_window.py    # 坐标配置（可选）
+├── log_view.py         # GuiLogBus、GuiLogHandler、LogPanelController
+└── hotkey_bridge.py    # F9/F10/Ctrl+F2 → root.after 切主线程
+```
+
+## 布局约定
+
+1. 主窗口采用 **上下分栏**：上方 `ttk.Notebook` 或 `ttk.Frame` 放配置/控制；下方 **`ScrolledText` 日志区**（见 `logging.mdc`）。
+2. 统一 `padding=8`；表单标签列 `sticky=tk.W`；长说明用 `wraplength` + `foreground="#555"`。
+3. 启停按钮文案须显示当前热键，例如 `开始 (F9)`、`停止 (F10)`。
+4. 数值项（播放次数、定时、停顿秒数）用 `ttk.Spinbox` 或 `ttk.Entry` + 校验。
+
+## 线程与 Tk 安全（强制）
+
+- **禁止**在工作线程中直接操作 Tk 控件。
+- workflow / 音频 / OCR 运行在 **后台线程**；UI 更新、日志追加、弹窗须经 `root.after(0, callback)` 或 `LogPanelController` 队列。
+- 热键回调（Win32 全局）同样 `root.after(0, …)` 后再调用与按钮相同的 `_start` / `_stop` 路径。
+- 关闭窗口时：先 `_stop` 运行中任务 → 停止 `FocusMonitor` → 注销热键 → `destroy`。
+- 启动运行时可 **隐藏/最小化** dyclicker 窗口，避免抢走目标软件焦点；失焦监测对象始终是 **目标音视频软件**，非 dyclicker 自身。
+
+## 与 core 的分层
+
+| 层 | 职责 |
+|----|------|
+| `gui/` | ttk 布局、配置读写、日志展示、热键绑定 |
+| `core/` | workflow、音频、OCR、鼠标；**不 import tk/ttk** |
+
+## 修改约定
+
+- 新增界面控件一律 `ttk.*`；复用 sibling 项目 `DynedClicker/gui/` 的 ttk 风格。
+- 配置变更在 GUI「保存」时写入配置文件，并 `logger.info` 记录关键项。
+- 日志区必须保留；不可改为仅控制台输出。
